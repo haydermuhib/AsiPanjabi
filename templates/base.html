@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AsiPanjabi - Modern Panjabi Vocabulary Portal{% endblock %}</title>
+  <meta name="description" content="Master Panjabi vocabulary with Gurmukhi, Shahmukhi, and Romanized script transliterations.">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-nav">
+    <a href="/" class="nav-brand">
+      <div class="nav-brand-badge">ਅ</div>
+      <span>AsiPanjabi</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="/" class="nav-link">Categories</a>
+      
+      <!-- Script Switcher Pills -->
+      <div class="nav-pill-group" id="scriptSelectorGroup">
+        <button class="pill-item gurmukhi" onclick="setGlobalScript('gurmukhi')">Gurmukhi (ਗੁਰਮੁਖੀ)</button>
+        <button class="pill-item shahmukhi" onclick="setGlobalScript('shahmukhi')">Shahmukhi (شاہ مکھی)</button>
+        <button class="pill-item romanized" onclick="setGlobalScript('romanized')">Romanized (ABC)</button>
+      </div>
+
+      <div id="authNavContainer">
+        <a href="/login" class="btn-secondary" id="loginBtn">Sign in</a>
+        <a href="/register" class="btn-primary" id="registerBtn">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Modern Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">AsiPanjabi</div>
+          <p style="color: #94A3B8; font-size: 0.92rem; max-width: 340px; line-height: 1.6;">
+            An interactive, structured Panjabi vocabulary portal designed for young learners, supporting Gurmukhi, Shahmukhi, and Romanized Panjabi scripts.
+          </p>
+        </div>
+        <div>
+          <h4 style="color: #FFFFFF; font-size: 0.95rem; margin-bottom: 0.85rem;">Popular Paths</h4>
+          <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><a href="/category/greetings-and-essentials">Greetings & Essentials</a></p>
+          <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><a href="/category/family-and-relatives">Family & Kinship</a></p>
+          <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><a href="/category/food-and-dining">Food & Dining</a></p>
+        </div>
+        <div>
+          <h4 style="color: #FFFFFF; font-size: 0.95rem; margin-bottom: 0.85rem;">Supported Scripts</h4>
+          <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><span class="script-badge gurmukhi">Gurmukhi (ਗੁਰਮੁਖੀ)</span></p>
+          <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><span class="script-badge shahmukhi">Shahmukhi (شاہ مکھی)</span></p>
+          <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><span class="script-badge romanized">Romanized Panjabi</span></p>
+        </div>
+      </div>
+      <div style="border-top: 1px solid #1E293B; padding-top: 1.75rem; font-size: 0.85rem; color: #64748B; display: flex; justify-content: space-between; align-items: center;">
+        <span>&copy; 2026 AsiPanjabi. Hosted on Supabase Cloud.</span>
+        <span>Empowering Panjabi Youth Worldwide</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

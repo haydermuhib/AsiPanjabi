@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} - Guided Lesson Studio | AsiPanjabi{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; padding-top: 1.5rem;">
+
+  <!-- Duolingo-style Studio Header & Progress Bar -->
+  <div class="studio-header">
+    <a href="/category/{{ lesson.category.slug }}" class="studio-close-btn" title="Exit Lesson">
+      <svg class="svg-icon" viewBox="0 0 24 24">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </a>
+
+    <div class="studio-progress-track">
+      <div class="studio-progress-fill" id="studioProgressFill" style="width: 10%;"></div>
+    </div>
+
+    <div class="studio-step-badge" id="studioStepBadge">
+      Step 1
+    </div>
+  </div>
+
+  <!-- Main Lesson Studio Container -->
+  <div class="studio-card-wrapper" id="studioCardWrapper">
+
+    <!-- 1. Flashcard / Learn Phase View -->
+    <div id="learnPhaseCard" class="learn-card" style="display: none;">
+      <div class="learn-card-header">
+        <span class="hero-pill">
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"
+              fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>New Vocabulary Word</span>
+        </span>
+        <button class="audio-btn" onclick="playCurrentWordAudio()" id="audioPlayBtn" title="Listen Pronunciation">
+          <svg class="svg-icon" viewBox="0 0 24 24" style="width: 22px; height: 22px;">
+            <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>Listen</span>
+        </button>
+      </div>
+
+      <div class="learn-card-body">
+        <div class="learn-word-display" id="learnWordPrimaryText">-</div>
+        <div class="learn-pronunciation-pill" id="learnPronunciationText">Pronounced: -</div>
+
+        <div class="learn-meaning-box">
+          <div class="learn-meaning-label">ENGLISH TRANSLATION</div>
+          <div class="learn-meaning-text" id="learnEnglishText">-</div>
+        </div>
+
+        <div class="learn-example-box" id="learnExampleBox">
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--color-muted); margin-bottom: 0.25rem;">EXAMPLE
+            SENTENCE</div>
+          <div style="font-size: 1.05rem; font-weight: 700; color: var(--color-ink);" id="learnExamplePa">-</div>
+          <div style="font-size: 0.9rem; color: var(--color-muted);" id="learnExampleEn">-</div>
+        </div>
+      </div>
+
+      <div class="learn-card-footer">
+        <button class="btn-primary" style="width: 100%; justify-content: center; height: 48px; font-size: 1.05rem;"
+          onclick="advanceStudioStep()">
+          <span>Got it! Continue</span>
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Interactive MCQ Quiz Phase View -->
+    <div id="quizPhaseCard" class="quiz-card" style="display: none;">
+      <div class="quiz-card-header">
+        <span class="hero-pill"
+          style="background-color: var(--script-shahmukhi-bg); border-color: rgba(99, 102, 241, 0.2);">
+          <svg class="svg-icon" viewBox="0 0 24 24" style="color: var(--accent-indigo);">
+            <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor"
+              stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span style="color: var(--accent-indigo);" id="quizHeaderScriptPill">Practice Question</span>
+        </span>
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--color-muted);" id="quizScoreTracker">Score:
+          0</span>
+      </div>
+
+      <div class="quiz-prompt-box">
+        <span
+          style="font-size: 0.8rem; font-weight: 700; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em;">SELECT
+          THE CORRECT TRANSLATION</span>
+        <h2 class="quiz-question-word" id="quizQuestionText">"..."</h2>
+      </div>
+
+      <div class="quiz-options-grid" id="quizOptionsGrid">
+        <!-- Dynamically rendered 4 option cards -->
+      </div>
+
+      <!-- Action & Feedback Bar -->
+      <div class="quiz-card-footer">
+        <div id="quizFeedbackDrawer" class="feedback-drawer" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;" id="quizFeedbackContent">
+            <!-- Dynamic feedback message -->
+          </div>
+        </div>
+
+        <button class="btn-primary" id="quizSubmitBtn"
+          style="width: 100%; justify-content: center; height: 48px; font-size: 1.05rem;" onclick="handleQuizSubmit()"
+          disabled>
+          Check Answer
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Lesson Mastery Celebration Card View -->
+    <div id="masteryPhaseCard" class="mastery-card" style="display: none;">
+      <div class="mastery-badge-icon">
+        <svg class="svg-icon" viewBox="0 0 24 24" style="width: 56px; height: 56px; color: var(--accent-saffron);">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+            fill="currentColor" />
+        </svg>
+      </div>
+
+      <h1 style="font-size: 2.25rem; font-weight: 900; margin-bottom: 0.5rem; color: var(--color-ink);">Lesson Complete!
+      </h1>
+      <p style="color: var(--color-muted); font-size: 1.05rem; max-width: 480px; margin: 0 auto 2rem;">
+        Awesome job! You have mastered the vocabulary in <strong style="color: var(--color-ink);">{{ lesson.title
+          }}</strong>.
+      </p>
+
+      <div class="mastery-stats-grid">
+        <div class="mastery-stat-card">
+          <div class="stat-value" id="masteryTotalWords">0</div>
+          <div class="stat-label">Words Learned</div>
+        </div>
+        <div class="mastery-stat-card">
+          <div class="stat-value" id="masteryAccuracy">100%</div>
+          <div class="stat-label">Quiz Accuracy</div>
+        </div>
+        <div class="mastery-stat-card">
+          <div class="stat-value" id="masteryScriptActive">Gurmukhi</div>
+          <div class="stat-label">Active Script</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <button class="btn-secondary" onclick="restartLessonStudio()">
+          <span>Practice Again</span>
+        </button>
+        <a href="/category/{{ lesson.category.slug }}" class="btn-primary">
+          <span>Continue Path</span>
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const lessonId = {{ lesson.id }};
+  let lessonVocabList = [];
+
+  // Guided Studio Engine State
+  let studioSteps = [];
+  let currentStepIndex = 0;
+  let selectedOptionId = null;
+  let quizAnswerChecked = false;
+  let quizCorrectCount = 0;
+  let totalQuizQuestions = 0;
+
+  async function initStudio() {
+    try {
+      const res = await fetch(`/api/lessons/${lessonId}`);
+      const data = await res.json();
+      lessonVocabList = data.vocabularies || [];
+
+      if (lessonVocabList.length > 0) {
+        buildStudioStepsSequence();
+        renderCurrentStudioStep();
+      }
+    } catch (err) {
+      console.error("Error initializing guided studio:", err);
+    }
+  }
+
+  function buildStudioStepsSequence() {
+    studioSteps = [];
+    quizCorrectCount = 0;
+
+    // Phase 1: Teach step for each vocabulary word
+    lessonVocabList.forEach(v => {
+      studioSteps.push({ type: 'learn', vocab: v });
+    });
+
+    // Phase 2: MCQ Quiz step for each vocabulary word
+    lessonVocabList.forEach(v => {
+      studioSteps.push({ type: 'quiz', vocab: v });
+    });
+
+    totalQuizQuestions = lessonVocabList.length;
+
+    // Phase 3: Final Mastery screen
+    studioSteps.push({ type: 'mastery' });
+  }
+
+  function renderCurrentStudioStep() {
+    if (studioSteps.length === 0) return;
+
+    const step = studioSteps[currentStepIndex];
+    const totalSteps = studioSteps.length;
+    const progressPercent = Math.round(((currentStepIndex + 1) / totalSteps) * 100);
+
+    // Update Progress Fill and Step Badge
+    document.getElementById('studioProgressFill').style.width = `${progressPercent}%`;
+    document.getElementById('studioStepBadge').innerText = step.type === 'mastery'
+      ? 'Complete'
+      : `Step ${currentStepIndex + 1} of ${totalSteps - 1}`;
+
+    // Hide all card views
+    document.getElementById('learnPhaseCard').style.display = 'none';
+    document.getElementById('quizPhaseCard').style.display = 'none';
+    document.getElementById('masteryPhaseCard').style.display = 'none';
+
+    if (step.type === 'learn') {
+      renderLearnCard(step.vocab);
+    } else if (step.type === 'quiz') {
+      renderQuizCard(step.vocab);
+    } else if (step.type === 'mastery') {
+      renderMasteryCard();
+    }
+  }
+
+  // --- 1. Learn Step Handler ---
+  function renderLearnCard(vocab) {
+    const card = document.getElementById('learnPhaseCard');
+    card.style.display = 'block';
+
+    const primaryText = document.getElementById('learnWordPrimaryText');
+    const pronunciationText = document.getElementById('learnPronunciationText');
+
+    if (currentScriptFilter === 'gurmukhi') {
+      primaryText.innerText = vocab.gurmukhi;
+      primaryText.className = "learn-word-display gurmukhi-text";
+      primaryText.style.color = "var(--script-gurmukhi-text)";
+    } else if (currentScriptFilter === 'shahmukhi') {
+      primaryText.innerText = vocab.shahmukhi;
+      primaryText.className = "learn-word-display shahmukhi-text";
+      primaryText.style.color = "var(--script-shahmukhi-text)";
+    } else {
+      primaryText.innerText = vocab.romanized;
+      primaryText.className = "learn-word-display";
+      primaryText.style.color = "var(--color-ink)";
+    }
+
+    pronunciationText.innerText = vocab.pronunciation_hint
+      ? `Pronounced: ${vocab.pronunciation_hint}`
+      : `Script: ${currentScriptFilter.toUpperCase()}`;
+
+    document.getElementById('learnEnglishText').innerText = vocab.english;
+
+    if (vocab.example_pa && vocab.example_en) {
+      document.getElementById('learnExampleBox').style.display = 'block';
+      document.getElementById('learnExamplePa').innerText = vocab.example_pa;
+      document.getElementById('learnExampleEn').innerText = vocab.example_en;
+    } else {
+      document.getElementById('learnExampleBox').style.display = 'none';
+    }
+  }
+
+  function playCurrentWordAudio() {
+    const step = studioSteps[currentStepIndex];
+    if (!step || !step.vocab) return;
+
+    const wordToSpeak = currentScriptFilter === 'gurmukhi' ? step.vocab.gurmukhi : step.vocab.english;
+
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(wordToSpeak);
+      utterance.rate = 0.88;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  // --- 2. MCQ Quiz Step Handler ---
+  function renderQuizCard(vocab) {
+    const card = document.getElementById('quizPhaseCard');
+    card.style.display = 'block';
+
+    selectedOptionId = null;
+    quizAnswerChecked = false;
+
+    document.getElementById('quizScoreTracker').innerText = `Score: ${quizCorrectCount}/${totalQuizQuestions}`;
+    document.getElementById('quizHeaderScriptPill').innerText = `Practice (${currentScriptFilter.toUpperCase()})`;
+    document.getElementById('quizQuestionText').innerText = `"${vocab.english}"`;
+
+    const drawer = document.getElementById('quizFeedbackDrawer');
+    drawer.style.display = 'none';
+    drawer.className = 'feedback-drawer';
+
+    const submitBtn = document.getElementById('quizSubmitBtn');
+    submitBtn.innerText = 'Check Answer';
+    submitBtn.disabled = true;
+    submitBtn.onclick = handleQuizSubmit;
+
+    // Build 4 option cards
+    let options = [vocab];
+    let distractors = lessonVocabList.filter(v => v.id !== vocab.id);
+    distractors.sort(() => Math.random() - 0.5);
+    options = options.concat(distractors.slice(0, 3));
+    options.sort(() => Math.random() - 0.5);
+
+    const grid = document.getElementById('quizOptionsGrid');
+    grid.innerHTML = '';
+
+    const letters = ['A', 'B', 'C', 'D'];
+    options.forEach((opt, idx) => {
+      const optionCard = document.createElement('div');
+      optionCard.className = 'quiz-option-card';
+      optionCard.setAttribute('data-id', opt.id);
+
+      let text = opt.romanized;
+      let textClass = "";
+      if (currentScriptFilter === 'gurmukhi') {
+        text = opt.gurmukhi;
+        textClass = "gurmukhi-text";
+      } else if (currentScriptFilter === 'shahmukhi') {
+        text = opt.shahmukhi;
+        textClass = "shahmukhi-text";
+      }
+
+      optionCard.innerHTML = `
+        <div class="option-badge">${letters[idx]}</div>
+        <div class="option-text ${textClass}">${text}</div>
+      `;
+
+      optionCard.onclick = () => selectQuizOption(opt.id, optionCard);
+      grid.appendChild(optionCard);
+    });
+  }
+
+  function selectQuizOption(id, element) {
+    if (quizAnswerChecked) return;
+
+    selectedOptionId = id;
+    const cards = document.querySelectorAll('.quiz-option-card');
+    cards.forEach(c => c.classList.remove('selected'));
+    element.classList.add('selected');
+
+    document.getElementById('quizSubmitBtn').disabled = false;
+  }
+
+  function handleQuizSubmit() {
+    if (!selectedOptionId) return;
+
+    const step = studioSteps[currentStepIndex];
+    const correctId = step.vocab.id;
+    const cards = document.querySelectorAll('.quiz-option-card');
+    const drawer = document.getElementById('quizFeedbackDrawer');
+    const drawerContent = document.getElementById('quizFeedbackContent');
+    const submitBtn = document.getElementById('quizSubmitBtn');
+
+    quizAnswerChecked = true;
+
+    cards.forEach(c => {
+      const cardId = parseInt(c.getAttribute('data-id'));
+      if (cardId === correctId) {
+        c.classList.add('correct');
+      } else if (cardId === selectedOptionId) {
+        c.classList.add('wrong');
+      }
+    });
+
+    drawer.style.display = 'block';
+
+    if (selectedOptionId === correctId) {
+      quizCorrectCount++;
+      drawer.className = 'feedback-drawer success';
+      drawerContent.innerHTML = `
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #059669; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">✓</div>
+        <div>
+          <strong style="color: #065F46; font-size: 1rem;">Excellent! Correct response.</strong>
+        </div>
+      `;
+    } else {
+      let correctText = step.vocab.romanized;
+      if (currentScriptFilter === 'gurmukhi') correctText = step.vocab.gurmukhi;
+      else if (currentScriptFilter === 'shahmukhi') correctText = step.vocab.shahmukhi;
+
+      drawer.className = 'feedback-drawer error';
+      drawerContent.innerHTML = `
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #DC2626; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">✕</div>
+        <div>
+          <strong style="color: #991B1B; font-size: 1rem;">Not quite right.</strong>
+          <div style="font-size: 0.88rem; color: #991B1B;">Correct answer: <strong>${correctText}</strong></div>
+        </div>
+      `;
+    }
+
+    document.getElementById('quizScoreTracker').innerText = `Score: ${quizCorrectCount}/${totalQuizQuestions}`;
+    submitBtn.innerText = 'Continue';
+    submitBtn.disabled = false;
+    submitBtn.onclick = advanceStudioStep;
+  }
+
+  function advanceStudioStep() {
+    if (currentStepIndex < studioSteps.length - 1) {
+      currentStepIndex++;
+      renderCurrentStudioStep();
+    }
+  }
+
+  // --- 3. Mastery Screen Handler ---
+  function renderMasteryCard() {
+    const card = document.getElementById('masteryPhaseCard');
+    card.style.display = 'block';
+
+    const accuracy = totalQuizQuestions > 0
+      ? Math.round((quizCorrectCount / totalQuizQuestions) * 100)
+      : 100;
+
+    document.getElementById('masteryTotalWords').innerText = lessonVocabList.length;
+    document.getElementById('masteryAccuracy').innerText = `${accuracy}%`;
+    document.getElementById('masteryScriptActive').innerText = currentScriptFilter.toUpperCase();
+  }
+
+  function restartLessonStudio() {
+    currentStepIndex = 0;
+    buildStudioStepsSequence();
+    renderCurrentStudioStep();
+  }
+
+  document.addEventListener('DOMContentLoaded', initStudio);
+</script>
+{% endblock %}

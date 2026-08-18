@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - AsiPanjabi{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="auth-card">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h2 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Create an account</h2>
+      <p style="color: var(--color-muted); font-size: 0.9rem;">Start learning Panjabi across your chosen script</p>
+    </div>
+
+    <div id="authAlert" style="display: none; padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 1rem;"></div>
+
+    <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
+      <div class="form-group">
+        <label class="form-label" for="regFullName">Full Name</label>
+        <input type="text" id="regFullName" class="form-input" placeholder="Gurpreet Singh" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="regEmail">Email address</label>
+        <input type="email" id="regEmail" class="form-input" placeholder="name@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="regPassword">Password</label>
+        <input type="password" id="regPassword" class="form-input" placeholder="••••••••" required minlength="6">
+      </div>
+
+      <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; height: 42px; margin-top: 0.5rem;">Create Account</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--color-muted);">
+      Already have an account? <a href="/login" style="color: var(--color-primary); font-weight: 600;">Sign in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  async function handleRegisterSubmit(e) {
+    e.preventDefault();
+    const full_name = document.getElementById('regFullName').value;
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    const alertBox = document.getElementById('authAlert');
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name, email, password })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('asipanjabi_token', data.access_token);
+        localStorage.setItem('asipanjabi_user', JSON.stringify(data.user));
+        alertBox.style.display = 'block';
+        alertBox.style.backgroundColor = '#ecfdf5';
+        alertBox.style.color = '#047857';
+        alertBox.innerText = 'Account created successfully. Redirecting...';
+        setTimeout(() => { window.location.href = '/'; }, 1000);
+      } else {
+        alertBox.style.display = 'block';
+        alertBox.style.backgroundColor = '#fef2f2';
+        alertBox.style.color = '#b91c1c';
+        alertBox.innerText = data.detail || 'Registration failed.';
+      }
+    } catch (err) {
+      alertBox.style.display = 'block';
+      alertBox.style.backgroundColor = '#fef2f2';
+      alertBox.style.color = '#b91c1c';
+      alertBox.innerText = 'An error occurred during registration.';
+    }
+  }
+</script>
+{% endblock %}

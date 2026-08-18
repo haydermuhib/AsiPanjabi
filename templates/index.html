@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}AsiPanjabi - Panjabi Vocabulary Portal{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Hero Section -->
+  <section class="hero-band">
+    <div>
+      <div class="hero-pill">
+        <svg class="svg-icon" viewBox="0 0 24 24">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+        </svg>
+        <span>Interactive Panjabi Vocabulary Portal</span>
+      </div>
+      <h1>Explore Panjabi Categories & Vocabulary</h1>
+      <p class="hero-sub">
+        Explore structured vocabulary topics with script transliterations (Gurmukhi, Shahmukhi, Romanized) and visual card previews.
+      </p>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="#categories" class="btn-primary">
+          <span>Browse Categories</span>
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a href="/register" class="btn-secondary">Create Free Account</a>
+      </div>
+    </div>
+
+    <!-- Interactive Hero Preview Card -->
+    <div class="hero-card-preview">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <span class="script-badge gurmukhi">ਗੁਰਮੁਖੀ</span>
+        <span class="script-badge shahmukhi">شاہ مکھی</span>
+        <span class="script-badge romanized">Romanized</span>
+      </div>
+      <div style="text-align: center; padding: 1.25rem 0;">
+        <div style="font-size: 0.95rem; color: var(--color-muted); font-weight: 600; margin-bottom: 0.5rem;">"How are you?"</div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--color-ink); margin-bottom: 0.25rem;">Kiddan?</div>
+        <div style="display: flex; justify-content: center; gap: 1.25rem; margin-top: 1rem;">
+          <span style="font-size: 1.5rem; color: var(--script-gurmukhi-text);" class="gurmukhi-text">ਕਿੱਦਾਂ?</span>
+          <span style="font-size: 1.5rem; color: var(--script-shahmukhi-text);" class="shahmukhi-text">کِداں؟</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Portal Grid -->
+  <section id="categories" style="padding: 2.5rem 0;">
+    <div class="section-header">
+      <div>
+        <h2>Vocabulary Categories</h2>
+        <p style="color: var(--color-muted); font-size: 0.95rem;">Select a category to explore vocabulary terms</p>
+      </div>
+    </div>
+
+    <div class="category-grid">
+      {% for cat in categories %}
+      <div class="category-card">
+        <div class="category-card-img-wrapper">
+          <img src="{{ cat.image_url }}" alt="{{ cat.title }}" class="category-card-img">
+        </div>
+        <div class="category-card-body">
+          <h3 class="category-card-title">{{ cat.title }}</h3>
+          <p class="category-card-desc">{{ cat.description }}</p>
+          <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+            <a href="/category/{{ cat.slug }}" class="btn-primary" style="padding: 8px 18px; font-size: 0.88rem;">
+              <span>Explore Category</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

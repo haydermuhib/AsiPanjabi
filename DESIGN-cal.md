@@ -3,6 +3,9 @@ version: alpha
 name: Cal.com-design-analysis
 description: A clean, calendar-software-first interface anchored on white canvas with black primary CTAs and custom Cal Sans display typography. The system reads as friendly modern SaaS — generous whitespace, soft-rounded cards (~12px), product UI fragments shown directly inside cards, and a dark navy footer that visually closes long-scroll pages. Brand voltage comes from the Cal Sans display headline (a custom geometric face) and from product UI artifacts shown in-card rather than from accent colors.
 
+# Strict Brand Directive: No Emojis
+Do NOT ever use emojis anywhere in the application interface, buttons, headings, toast notifications, badges, or content cards. Emojis break the engineering precision of the Cal.com aesthetic. Always use clear, professional typography, subtle micro-badges, or clean vector SVG icons instead.
+
 colors:
   primary: "#111111"
   primary-active: "#242424"

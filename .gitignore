@@ -40,6 +40,9 @@ env/
 *.swp
 *.swo
 
-# Temporary Files
+# Temporary Files & Local Databases
 *.tmp
 *.log
+*.db
+*.sqlite3
+asipunjabi.db
